@@ -277,11 +277,14 @@ class _ComicPageImpl extends BaseComicPage<ComicInfoData> {
   @override
   Widget thumbnailImageBuilder(int index, String imageUrl) {
     return Image(
-      image: StreamImageProvider(
-          () => ImageManager().getCustomThumbnail(imageUrl, sourceKey),
-          imageUrl),
+      image: ResizeImage.resizeIfNeeded(
+        200.cacheSize(context),
+        null,
+        StreamImageProvider(
+            () => ImageManager().getCustomThumbnail(imageUrl, sourceKey),
+            imageUrl),
+      ),
       fit: BoxFit.contain,
-      cacheWidth: 200.cacheSize(context),
       errorBuilder: (context, s, d) => const Icon(Icons.error),
     );
   }
@@ -2093,10 +2096,12 @@ abstract class BaseComicPage<T extends Object> extends StatelessWidget {
 
   Widget _thumbnailImageBuilder(int index, [String? imageUrl]) {
     return Image(
-      image:
-          CachedImageProvider(imageUrl ?? thumbnails!.thumbnails[index], headers: headers),
+      image: ResizeImage.resizeIfNeeded(
+        200.cacheSize(context),
+        null,
+        CachedImageProvider(imageUrl ?? thumbnails!.thumbnails[index], headers: headers),
+      ),
       fit: BoxFit.contain,
-      cacheWidth: 200.cacheSize(context),
       errorBuilder: (context, s, d) => const Icon(Icons.error),
     );
   }

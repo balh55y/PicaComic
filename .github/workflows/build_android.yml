@@ -16,6 +16,8 @@ jobs:
   build_android:
     name: Build Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,8 +58,17 @@ jobs:
       - name: Build Android APK
         run: flutter build apk --release --android-skip-build-dependency-validation
 
-      - name: Upload Android APKs
-        uses: actions/upload-artifact@v4
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: PicaComic-Android-APK
-          path: build/app/outputs/flutter-apk/*.apk
+          tag_name: latest-build
+          name: Latest Android Build
+          body: |
+            自动编译的最新 Android APK 安装包（直接点击对应 apk 下载即可，手机直接安装请选择 arm64-v8a）：
+            - **arm64-v8a.apk**: 适用于绝大部分现代主流安卓手机（约 30MB）
+            - **x86_64.apk**: 适用于电脑端安卓模拟器（雷电/夜神/MuMu等）
+            - **universal.apk**: 全机型通用版
+          files: build/app/outputs/flutter-apk/*.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

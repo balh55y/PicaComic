@@ -13,7 +13,9 @@ import 'package:pica_comic/components/components.dart';
 import 'package:pica_comic/components/select_download_eps.dart';
 import 'package:pica_comic/foundation/app.dart';
 import 'package:pica_comic/foundation/history.dart';
+import 'package:pica_comic/foundation/image_loader/base_image_provider.dart';
 import 'package:pica_comic/foundation/image_loader/cached_image.dart';
+import 'package:pica_comic/utils/image_extension.dart';
 import 'package:pica_comic/foundation/image_loader/stream_image_provider.dart';
 import 'package:pica_comic/foundation/image_manager.dart';
 import 'package:pica_comic/foundation/local_favorites.dart';
@@ -279,6 +281,7 @@ class _ComicPageImpl extends BaseComicPage<ComicInfoData> {
           () => ImageManager().getCustomThumbnail(imageUrl, sourceKey),
           imageUrl),
       fit: BoxFit.contain,
+      cacheWidth: 200.cacheSize(context),
       errorBuilder: (context, s, d) => const Icon(Icons.error),
     );
   }
@@ -833,7 +836,7 @@ abstract class BaseComicPage<T extends Object> extends StatelessWidget {
   ActionFunc? get searchSimilar => null;
 
   Widget thumbnailImageBuilder(int index, String imageUrl) =>
-      _thumbnailImageBuilder(index);
+      _thumbnailImageBuilder(index, imageUrl);
 
   /// The source of this comic, displayed at the beginning of the [title],
   /// can be translated into the user's language.
@@ -877,6 +880,12 @@ abstract class BaseComicPage<T extends Object> extends StatelessWidget {
         },
         dispose: (logic) {
           tagsStack.pop();
+          BaseImageProvider.clearCache();
+          if (!DownloadManager().isDownloading) {
+            ImageManager.clearTasks();
+          }
+          PaintingBinding.instance.imageCache.clear();
+          PaintingBinding.instance.imageCache.clearLiveImages();
         },
         builder: (logic) {
           _logic.width = constraints.maxWidth;
@@ -2082,11 +2091,12 @@ abstract class BaseComicPage<T extends Object> extends StatelessWidget {
     ];
   }
 
-  Widget _thumbnailImageBuilder(int index) {
+  Widget _thumbnailImageBuilder(int index, [String? imageUrl]) {
     return Image(
       image:
-          CachedImageProvider(thumbnails!.thumbnails[index], headers: headers),
+          CachedImageProvider(imageUrl ?? thumbnails!.thumbnails[index], headers: headers),
       fit: BoxFit.contain,
+      cacheWidth: 200.cacheSize(context),
       errorBuilder: (context, s, d) => const Icon(Icons.error),
     );
   }

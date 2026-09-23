@@ -540,6 +540,8 @@ class EhThumbnailLoader extends StatefulWidget {
 
 class _EhThumbnailLoaderState extends State<EhThumbnailLoader> {
   ui.Image? image;
+  ImageStream? _imageStream;
+  ImageStreamListener? _listener;
 
   bool failed = false;
 
@@ -547,6 +549,14 @@ class _EhThumbnailLoaderState extends State<EhThumbnailLoader> {
   void initState() {
     super.initState();
     _loadImage();
+  }
+
+  @override
+  void dispose() {
+    if (_imageStream != null && _listener != null) {
+      _imageStream!.removeListener(_listener!);
+    }
+    super.dispose();
   }
 
   @override
@@ -572,6 +582,7 @@ class _EhThumbnailLoaderState extends State<EhThumbnailLoader> {
 
   void _loadImage() async {
     final imageStream = widget.image.resolve(ImageConfiguration.empty);
+    _imageStream = imageStream;
 
     var listener = ImageStreamListener((imageInfo, _) {
       if (mounted) {
@@ -580,10 +591,13 @@ class _EhThumbnailLoaderState extends State<EhThumbnailLoader> {
         });
       }
     }, onError: (error, stack) {
-      setState(() {
-        failed = true;
-      });
+      if (mounted) {
+        setState(() {
+          failed = true;
+        });
+      }
     });
+    _listener = listener;
 
     imageStream.addListener(listener);
   }

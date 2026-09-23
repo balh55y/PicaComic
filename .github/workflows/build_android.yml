@@ -26,12 +26,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android Licenses & Install NDK
+      - name: Accept Android Licenses
         run: |
           yes | sdkmanager --licenses || true
+
+      - name: Install NDK 28
+        run: |
           sdkmanager "ndk;28.0.13004108" || true
 
       - name: Setup Flutter

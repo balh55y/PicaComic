@@ -40,6 +40,16 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Generate Release Keystore
+        run: |
+          keytool -genkey -v -keystore android/app/release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias pica -storepass 123456 -keypass 123456 -dname "CN=Pica, OU=Pica, O=Pica, L=Pica, S=Pica, C=CN"
+          cat <<EOF > android/key.properties
+          keyAlias=pica
+          keyPassword=123456
+          storeFile=release.jks
+          storePassword=123456
+          EOF
+
       - name: Install dependencies
         run: flutter pub get
 
